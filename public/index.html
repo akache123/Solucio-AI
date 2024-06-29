@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nearby Restaurants</title>
+    <style>
+        #restaurants div {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nearby Restaurants</h1>
+    <button onclick="getLocation()">Load Restaurants Near Me</button>
+    <div id="restaurants"></div>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(fetchRestaurants, handleLocationError, {timeout: 10000});
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        function fetchRestaurants(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+        
+            fetch(`/api/restaurants?latitude=${latitude}&longitude=${longitude}`)
+                .then(response => response.json())
+                .then(data => {
+                    const restaurants = document.getElementById('restaurants');
+                    restaurants.innerHTML = '';
+                    if (data.results && data.results.length > 0) {
+                        data.results.forEach(place => {
+                            const div = document.createElement('div');
+                            const name = document.createElement('h4');
+                            name.textContent = place.name;
+                            div.appendChild(name);
+        
+                            if (place.rating) {
+                                const rating = document.createElement('p');
+                                rating.textContent = `Rating: ${place.rating} stars`;
+                                div.appendChild(rating);
+                            }
+        
+                            if (place.vicinity) {
+                                const address = document.createElement('p');
+                                address.textContent = `Address: ${place.vicinity}`;
+                                div.appendChild(address);
+                            }
+        
+                            if (place.website && place.website !== "No website available") {
+                                const website = document.createElement('a');
+                                website.href = place.website;
+                                website.textContent = 'Visit Website';
+                                website.target = '_blank';
+                                div.appendChild(website);
+                            } else {
+                                const noWebsite = document.createElement('p');
+                                noWebsite.textContent = 'No website available';
+                                div.appendChild(noWebsite);
+                            }
+        
+                            restaurants.appendChild(div);
+                        });
+                    } else {
+                        restaurants.innerHTML = '<p>No restaurants found near your location.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching restaurants:', error);
+                    alert('Failed to fetch restaurant data.');
+                });
+        }        
+
+        function handleLocationError(error) {
+            let message = '';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = "Access to location was denied. Please enable location services if you want to use this feature.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = "Location information is currently unavailable.";
+                    break;
+                case error.TIMEOUT:
+                    message = "The request to get your location timed out.";
+                    break;
+                default:
+                    message = "An unknown error occurred trying to fetch your location.";
+                    break;
+            }
+            alert(message);
+            document.getElementById('restaurants').innerHTML = '<p>Please allow location access and try again.</p>';
+        }
+    </script>
+</body>
+</html>

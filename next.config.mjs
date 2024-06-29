@@ -1,4 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    env: {
+      CLERK_AUTH_KEY: process.env.CLERK_AUTH_KEY,
+    },
+  };
+  
+  export default nextConfig;
+  
