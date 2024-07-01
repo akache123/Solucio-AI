@@ -21,7 +21,7 @@ if (typeof window !== 'undefined') {
             <React.StrictMode>
                 <Router>
                     <App openaikey={openaikey} clerkPubKey={clerkPubKey} googleMapsApiKey={googleMapsApiKey}>
-                        <MapComponent /> {/* Dynamically loaded MapComponent */}
+                        <MapComponent /> 
                     </App>
                 </Router>
             </React.StrictMode>
