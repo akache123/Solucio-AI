@@ -1,3 +1,20 @@
+import {
+  SignInButton,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+} from "@clerk/nextjs";
+
 export default function LandingPage() {
-  return <h1 className="text-4xl font-bold">Hello there</h1>
+  return (
+    <>
+      <SignedOut>
+        <SignInButton />
+      </SignedOut>
+      <SignedIn>
+        <SignOutButton />
+      </SignedIn>
+      <h1 className="text-4xl font-bold">Hello there</h1>{" "}
+    </>
+  );
 }
