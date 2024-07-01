@@ -3,8 +3,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // Define route matchers based on your application's routing structure
 const isPublicRoute = createRouteMatcher([
   "/", // Home page
-  "/sign-in(.*)", // Matches any sub-route under /sign-in
-  "/sign-up(.*)", // Matches any sub-route under /sign-up
+  // "/sign-in(.*)", // Matches any sub-route under /sign-in
+  // "/sign-up(.*)", // Matches any sub-route under /sign-up
 ]);
 
 // Configuration for Clerk middleware
