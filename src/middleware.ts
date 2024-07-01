@@ -14,8 +14,8 @@ const clerkOptions = {
   domain: process.env.CLERK_API_URL,
   // signInUrl: "/sign-in",
   // signUpUrl: "/sign-up",
-  afterSignInUrl: "/dashboard",
-  afterSignUpUrl: "/dashboard",
+  // afterSignInUrl: "/dashboard",
+  // afterSignUpUrl: "/dashboard",
   isSatellite: false,
 };
 
