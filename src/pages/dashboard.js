@@ -3,6 +3,7 @@ import Image from "next/image"
  
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
+
 import {
   Card,
   CardContent,
@@ -11,31 +12,41 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+
+import { Bold } from "lucide-react"
+ 
+import { Toggle } from "@/components/ui/toggle"
  
 const foodList = [
   {
     name: "pizza",
     cuisine: "Italian",
+    tags: ["spicy", "contains-egg", "cheese"],
   },
   {
     name: "burger",
     cuisine: "american",
+    tags: ["spicy", "contains-egg", "cheese"],
   },
   {
     name: "noodles",
     cuisine: "chinese",
+    tags: ["spicy", "contains-egg", "cheese"],
   },
   {
     name: "pizza",
     cuisine: "Italian",
+    tags: ["spicy", "contains-egg", "cheese"],
   },
   {
     name: "burger",
     cuisine: "american",
+    tags: ["spicy", "contains-egg", "cheese"],
   },
   {
     name: "noodles",
     cuisine: "chinese",
+    tags: ["spicy", "contains-egg", "cheese"],
   }];
 
 export default function Dashboard() {
@@ -66,10 +77,15 @@ export default function Dashboard() {
               <CardDescription>{fooditem.cuisine}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p>Card Content</p>
+              <p>description</p>
             </CardContent>
+            <hr className="my-2 border-gray-300" />
             <CardFooter>
-              <p>Card Footer</p>
+              {fooditem.tags.map((tag) => (
+                <Toggle aria-label="Toggle bold">
+                  {tag}
+                </Toggle>
+              ))}
             </CardFooter>
           </div>
         </div>    
