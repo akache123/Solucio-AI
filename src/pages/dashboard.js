@@ -17,6 +17,15 @@ import { Bold } from "lucide-react"
  
 import { Toggle } from "@/components/ui/toggle"
  
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+
 const foodList = [
   {
     name: "pizza",
@@ -87,6 +96,19 @@ export default function Dashboard() {
                 </Toggle>
               ))}
             </CardFooter>
+
+            <Dialog>
+              <DialogTrigger>click for more info</DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>more info!</DialogTitle>
+                  <DialogDescription>
+                    more information will come soon
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+
           </div>
         </div>    
         ))}
