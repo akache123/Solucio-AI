@@ -61,16 +61,17 @@ const foodList = [
 export default function Dashboard() {
   return (
     <div>
-    <div style={{
+    {/* <div style={{
             color: '#000',
             marginLeft: '20px',
             marginBottom: '20px',
-            fontFamily: 'Inter',
+            // fontFamily: 'Inter',
             fontSize: '40px',
-            fontStyle: 'normal',
-            fontWeight: 600,
+            // fontStyle: 'normal',
+            // fontWeight: 600,
             lineHeight: 'normal',
-          }}>Your Recommendations</div>
+          }}>Your Recommendations</div> */}
+    <div className="scroll-m-20 pb-2 text-4xl font-semibold tracking-tight first:mt-0">Your Recommendations</div>
     <div className="flex items-center justify-center min-h-screen">
       <ScrollArea className="w-[60%] rounded-md border">
       <div className="p-4">
