@@ -64,7 +64,6 @@ export default async function handler(req, res) {
         results = results.concat(response.data.results);
         pageToken = response.data.next_page_token;
 
-        // Google API requires a short delay before requesting the next page
         if (pageToken) {
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
@@ -96,7 +95,7 @@ export default async function handler(req, res) {
 const splitAndSendToOpenAI = async (results, res) => {
   const chunkSize = 20;
   const promptTemplate = `give me 20 of each of their menu items, exactly what is in it, use tons of generalities, always start the JSON with a basic name of the food item, only focus on the food items, don't include any description of the restaurant,
-  give it in a raw json format, and only the json, nothing else. Each item should have the following attributes without using '''json:
+  give it in a raw json format, and only the json, nothing else. Each item should have the following attributes without ever using '''json, make sure to never give anything except pure json format:
   1. "name": The basic name of the food item (e.g., "Chicken Parmesan", "Veggie Pizza").
   2. "cuisine": The type of cuisine (Options: "Italian", "Japanese", "Mexican", "Indian", "American", "Chinese", "Thai", "Mediterranean", "French", "Vietnamese").
   3. "taste": The primary taste profile (Options: "savory", "sweet", "umami", "bitter", "sour").
@@ -114,6 +113,7 @@ const splitAndSendToOpenAI = async (results, res) => {
   15. "popularity": Rating based on customer feedback (Options: "low", "moderate", "high", "top seller").
   16. "allergens": List of common allergens present (Options: ["nuts", "dairy", "gluten", "eggs", "shellfish"]).
   17. "seasonal": Boolean indicating if the dish is a seasonal special (Options: true, false).
+  18. "timeOfDay": List of times to choose from (Options: ["Breakfast", "Morning Snack", "Lunch", "Afternoon Snack", "Dinner", "Evening Snack", "Midnight Snack"]).
   
   Structure each menu item in this JSON format with the specified attributes, ensuring that all fields are filled out where applicable. This will be used to generate comprehensive and uniform data for each dish without adding restaurant-specific details. Make sure to never add the name of the place.`;
   
@@ -126,7 +126,7 @@ const splitAndSendToOpenAI = async (results, res) => {
         model: "gpt-3.5-turbo",
         messages: [
           { role: "system", content: "You are a helpful assistant." },
-          { role: "user", content: prompt }
+          { role: "user", content: c }
         ],
       });
 
