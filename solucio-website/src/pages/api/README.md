@@ -70,7 +70,28 @@
   };
   ```
 
+### 1d. `/api/delete_liked`
 
+- **Purpose:** Handles unliking objects action.
+- **Method:** DELETE
+- **Parameters:**
+  - \`clerkId\`: ID of the Clerk user performing the action.
+  - \`objectId\`: ID of the object being liked.
+- **Usage Example:**
+```javascript
+  const handleDeleteLiked = async () => {
+    const objectId = '6683a5ed53238178ac59b76f';
+    try {
+      const response = await axios.post('/api/delete_liked', {
+        clerkId: user.id,
+        objectId: objectId
+      });
+      console.log('Response from /api/delete_liked:', response.data);
+    } catch (error) {
+      console.error('Error on delete_liked:', error);
+    }
+  };
+  ```
 
 ### 2. `/api/load_data` DO NOT USE - IGNORE
 
