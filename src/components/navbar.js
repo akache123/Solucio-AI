@@ -19,6 +19,18 @@ import { LogOut } from "lucide-react";
 export function Navbar() {
   const { isLoaded, isSignedIn, user } = useUser();
 
+  // Helper function to get initials
+  const getUserInitials = () => {
+    let initials = "";
+    if (user.firstName) {
+      initials += user.firstName[0];
+    }
+    if (user.lastName) {
+      initials += user.lastName[0];
+    }
+    return initials;
+  };
+
   return (
     <div className="w-full border-b px-6 py-3">
       <div className="flex flex-row justify-between items-center">
@@ -26,21 +38,18 @@ export function Navbar() {
           Solucio AI
         </h3>
 
-        {/*
-          1. User signed in: Display avatar with dropdown menu
-          2. Not signed in: Display secondary "Sign In" button
-        */}
-
         {isSignedIn ? (
           <SignedIn>
             <DropdownMenu>
-              {/* Click the avatar to open the dropdown menu */}
               <DropdownMenuTrigger>
                 <Avatar>
-                  <AvatarImage src={user.imageUrl} />
-                  <AvatarFallback>
-                    {user.firstName[0] + user.lastName[0]}
-                  </AvatarFallback>
+                  {user.imageUrl ? (
+                    <AvatarImage src={user.imageUrl} />
+                  ) : (
+                    <AvatarFallback>
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               </DropdownMenuTrigger>
 
