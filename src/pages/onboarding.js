@@ -47,17 +47,17 @@ export default function Onboarding() {
                   <div className="p-1">
                     <Card>
                       <CardContent className="flex flex-col p-6">
-                        <div className="h-60 bg-gray-300 rounded-md flex justify-center items-center">
+                        <div className="h-72 bg-gray-300 rounded-md flex justify-center items-center">
                           <span className="text-gray-500">
                             Image Placeholder
                           </span>
                         </div>
                         <div className="mt-6">
-                          <span className="text-4xl font-semibold">
+                          <span className="text-3xl font-semibold">
                             {food.name}
                           </span>
                           <br />
-                          <span className="text-xl font-normal text-muted-foreground tracking-wide">
+                          <span className="text-md font-normal text-muted-foreground tracking-wide">
                             {food.cuisine}
                           </span>
                         </div>
