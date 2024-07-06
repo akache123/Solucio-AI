@@ -31,31 +31,37 @@ import { Badge } from "@/components/ui/badge"
 
 const foodList = [
   {
+    id: 1,
     name: "pizza",
     cuisine: "Italian",
     tags: ["spicy", "contains-egg", "cheese"],
   },
   {
+    id: 2,
     name: "burger",
     cuisine: "american",
     tags: ["spicy", "contains-egg", "cheese"],
   },
   {
+    id: 3,
     name: "noodles",
     cuisine: "chinese",
     tags: ["spicy", "contains-egg", "cheese"],
   },
   {
+    id: 4,
     name: "pizza",
     cuisine: "Italian",
     tags: ["spicy", "contains-egg", "cheese"],
   },
   {
+    id: 5,
     name: "burger",
     cuisine: "american",
     tags: ["spicy", "contains-egg", "cheese"],
   },
   {
+    id: 6,
     name: "noodles",
     cuisine: "chinese",
     tags: ["spicy", "contains-egg", "cheese"],
@@ -79,7 +85,7 @@ export default function Dashboard() {
       <ScrollArea className="w-[60%] rounded-md border">
       <div className="p-4">
         {foodList.map((fooditem) => (
-          <div className="flex border rounded-md mb-4">
+          <div key={fooditem.id} className="flex border rounded-md mb-4">
           {/* <img src={imageUrl} alt={name} className="w-1/3 object-cover rounded-l-md" /> */}
           <div className="w-1/3 h-48 bg-gray-300 rounded-l-md flex items-center pl-4">
             <span className="text-gray-500">Image Placeholder</span>
@@ -100,7 +106,7 @@ export default function Dashboard() {
             <hr className="my-2 border-gray-300" />
             <CardFooter>
               {fooditem.tags.map((tag) => (
-                <Badge style={{ marginRight: '10px' }} variant="outline">{tag}</Badge>
+                <Badge key={tag} style={{ marginRight: '10px' }} variant="outline">{tag}</Badge>
               ))}
             </CardFooter>
 
