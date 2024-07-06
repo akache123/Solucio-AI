@@ -47,7 +47,7 @@ export default function Onboarding() {
                   <div className="p-1">
                     <Card>
                       <CardContent className="flex flex-col p-6">
-                        <div className="h-72 bg-gray-300 rounded-md flex justify-center items-center">
+                        <div className="h-40 bg-gray-300 rounded-md flex justify-center items-center md:h-96">
                           <span className="text-gray-500">
                             Image Placeholder
                           </span>
