@@ -46,10 +46,21 @@ export default function Onboarding() {
                 <CarouselItem key={i}>
                   <div className="p-1">
                     <Card>
-                      <CardContent className="flex aspect-square items-center justify-center p-6">
-                        <span className="text-4xl font-semibold">
-                          {food.name}
-                        </span>
+                      <CardContent className="flex flex-col p-6">
+                        <div className="h-60 bg-gray-300 rounded-md flex justify-center items-center">
+                          <span className="text-gray-500">
+                            Image Placeholder
+                          </span>
+                        </div>
+                        <div className="mt-6">
+                          <span className="text-4xl font-semibold">
+                            {food.name}
+                          </span>
+                          <br />
+                          <span className="text-xl font-normal text-muted-foreground tracking-wide">
+                            {food.cuisine}
+                          </span>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
