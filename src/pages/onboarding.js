@@ -9,28 +9,50 @@ import { Button } from "../components/ui/button";
 import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import axios from 'axios';
+import { useUser } from "@clerk/nextjs";
+
+const fetchFirstSwipes = async (setFoodList) => {
+  try {
+    const response = await axios.get('/api/generate-first-swipes');
+    console.log('Random objects:', response.data);
+    setFoodList(response.data);
+    console.log(response.data);
+  } catch (error) {
+    console.error('Error fetching random objects:', error);
+  }
+};
+
+const handleSwipeRight = async (id, user) => {
+  const objectId = {id};
+  try {
+    const response = await axios.post('/api/swipe_right', {
+      clerkId: user.id,
+      objectId: objectId
+    });
+    console.log('Response from /api/swipe_right:', response.data);
+  } catch (error) {
+    console.error('Error on swipe right:', error);
+  }
+};
 
 export default function Onboarding() {
   const router = useRouter();
 
-  const foodList = [
-    {
-      name: "Pizza",
-      cuisine: "Italian",
-    },
-    {
-      name: "Burger",
-      cuisine: "American",
-    },
-    {
-      name: "Noodles",
-      cuisine: "Chinese",
-    },
-  ];
-
   const [api, setApi] = useState();
   const [count, setCount] = useState(0);
   const [current, setCurrent] = useState(0);
+  const [foodList, setFoodList] = useState([]);
+
+  const { isLoaded, user } = useUser();
+
+  // getting the first 10 items
+  useEffect(() => {
+    if (isLoaded && user) {
+      console.log("Clerk user ID:", user.id);
+      fetchFirstSwipes(setFoodList);
+    }
+  }, [isLoaded, user, setFoodList]);
 
   // Responsible for updating the text in-between both buttons
   useEffect(() => {
@@ -61,10 +83,17 @@ export default function Onboarding() {
     // Otherwise, simply redirect them to the dashboard. This prevents them from re-clicking
     // the buttons when they hit the last food item
     if (api.canScrollNext()) {
+
+      if(liked == true){
+        handleSwipeRight(foodList[current]._id, user);
+        console.log(foodList[current]._id)
+      }
+
       api.scrollNext();
     } else {
       router.push("/dashboard");
     }
+
   }
 
   return (
