@@ -1,3 +1,11 @@
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "../components/ui/carousel";
+
 export default function Onboarding() {
   return (
     <div className="flex flex-row min-h-screen">
@@ -12,7 +20,16 @@ export default function Onboarding() {
         </p>
       </div>
       <div className="flex w-full justify-center">
-        <p className="text-sm">This is the other half</p>
+        <Carousel>
+          <CarouselContent>
+            <CarouselItem>Item 1</CarouselItem>
+            <CarouselItem>Item 2</CarouselItem>
+            <CarouselItem>Item 3</CarouselItem>
+          </CarouselContent>
+
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
       </div>
     </div>
   );
