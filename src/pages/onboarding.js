@@ -2,14 +2,17 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  CarouselApi,
 } from "../components/ui/carousel";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { Check, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Onboarding() {
+  const router = useRouter();
+
   const foodList = [
     {
       name: "Pizza",
@@ -25,8 +28,47 @@ export default function Onboarding() {
     },
   ];
 
+  const [api, setApi] = useState();
+  const [count, setCount] = useState(0);
+  const [current, setCurrent] = useState(0);
+
+  // Responsible for updating the text in-between both buttons
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
+  // Called when the user clicks either Yes or No buttons
+  // liked (bool): whether the user clicked "yes" (true) or "no" (false)
+  function select(liked) {
+    if (!api) {
+      return;
+    }
+
+    console.log(
+      `User selected ${liked ? "Yes" : "No"} on item ${current}/${count}`
+    );
+
+    // If there are food items left, allow the user to scroll
+    // Otherwise, simply redirect them to the dashboard. This prevents them from re-clicking
+    // the buttons when they hit the last food item
+    if (api.canScrollNext()) {
+      api.scrollNext();
+    } else {
+      router.push("/dashboard");
+    }
+  }
+
   return (
-    <div className="flex flex-row w-full gap-4">
+    <div className="flex flex-row w-full">
       <div className="w-3/5 p-4">
         <h1 className="scroll-m-20 pb-2 text-4xl font-semibold first:mt-0">
           Swipe to personalize your food
@@ -38,9 +80,11 @@ export default function Onboarding() {
         </p>
       </div>
 
+      {/* NOTE: `watchDrag` enables/disables dragging to scroll
+      https://www.embla-carousel.com/api/options/#watchdrag */}
       <div className="flex justify-center w-full p-4">
         <div className="flex flex-col">
-          <Carousel>
+          <Carousel setApi={setApi} opts={{ watchDrag: false }}>
             <CarouselContent>
               {foodList.map((food, i) => (
                 <CarouselItem key={i}>
@@ -74,18 +118,20 @@ export default function Onboarding() {
               variant="secondary"
               size="lg"
               className="rounded-full hover:bg-red-200"
+              onClick={() => select(false)}
             >
               <X className="w-4 h-4 text-red-800" />
             </Button>
 
-            <p className="text-sm font-light text-secondary-foreground px-12 tracking-widest">
-              1/5
+            <p className="text-center text-sm font-light text-secondary-foreground tracking-widest min-w-10 md:min-w-32">
+              {current}/{count}
             </p>
 
             <Button
               variant="secondary"
               size="lg"
               className="rounded-full hover:bg-green-200"
+              onClick={() => select(true)}
             >
               <Check className="w-4 h-4 text-green-800" />
             </Button>
