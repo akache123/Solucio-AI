@@ -17,14 +17,14 @@ import { Check, LoaderCircle, X } from "lucide-react";
 function useFoodList() {
   // https://swr.vercel.app/docs/getting-started
 
-  const { data, error, isLoading } = useSwr(
+  const { data, error, isLoading, isValidating } = useSwr(
     "/api/generate-first-swipes",
     (...args) => fetch(...args).then((res) => res.json())
   );
 
   return {
     foodList: data,
-    isFoodLoading: isLoading,
+    isFoodLoading: isLoading || isValidating,
     isFoodError: error,
   };
 }
@@ -37,19 +37,17 @@ export default function Onboarding() {
 
   // Fetch food items to prompt the user for their preferences
   // const { foodList, isFoodLoading } = useFoodList();
-  const isFoodLoading = true;
-  const foodList = [
-    {
-      name: "Pizza",
-      cuisine: "Italian",
-    },
-  ];
+  const { foodList, isFoodLoading } = useFoodList();
 
   // liked (bool): true if user clicks "Yes", false if user clicks "No"
   function select(liked) {
+    if (isFoodLoading) {
+      return;
+    }
+
     // Only allow the user to move to the next card if there's space available
     // Otherwise, redirect to the dashboard
-    if (current < foodList) {
+    if (current < foodList.length - 1) {
       setCurrent(current + 1);
     } else {
       router.push("/dashboard");
@@ -77,7 +75,7 @@ export default function Onboarding() {
             <CardHeader>
               {isFoodLoading ? (
                 <>
-                  <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center">
+                  <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center animate-pulse">
                     <span className="text-gray-500">Loading Image</span>
                   </div>
                   <CardTitle>Loading...</CardTitle>
