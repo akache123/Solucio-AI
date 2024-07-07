@@ -75,11 +75,23 @@ export default function Onboarding() {
         <div className="flex flex-col">
           <Card className="">
             <CardHeader>
-              <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center">
-                <span className="text-gray-500">Image Placeholder</span>
-              </div>
-              <CardTitle>{foodList[current].name}</CardTitle>
-              <CardDescription>{foodList[current].cuisine}</CardDescription>
+              {isFoodLoading ? (
+                <>
+                  <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center">
+                    <span className="text-gray-500">Loading Image</span>
+                  </div>
+                  <CardTitle>Loading...</CardTitle>
+                  <CardDescription>Loading...</CardDescription>
+                </>
+              ) : (
+                <>
+                  <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center">
+                    <span className="text-gray-500">Image Placeholder</span>
+                  </div>
+                  <CardTitle>{foodList[current].name}</CardTitle>
+                  <CardDescription>{foodList[current].cuisine}</CardDescription>
+                </>
+              )}
             </CardHeader>
           </Card>
 
@@ -89,6 +101,7 @@ export default function Onboarding() {
               size="lg"
               className="rounded-full hover:bg-red-200"
               onClick={() => select(false)}
+              disabled={isFoodLoading}
             >
               <X className="w-4 h-4 text-red-800" />
             </Button>
@@ -108,6 +121,7 @@ export default function Onboarding() {
               size="lg"
               className="rounded-full hover:bg-green-200"
               onClick={() => select(true)}
+              disabled={isFoodLoading}
             >
               <Check className="w-4 h-4 text-green-800" />
             </Button>
