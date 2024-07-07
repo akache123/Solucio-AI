@@ -19,7 +19,10 @@ function useFoodList() {
 
   const { data, error, isLoading, isValidating } = useSwr(
     "/api/generate-first-swipes",
-    (...args) => fetch(...args).then((res) => res.json())
+    (...args) => fetch(...args).then((res) => res.json()),
+    {
+      revalidateOnFocus: false,
+    }
   );
 
   return {
@@ -33,17 +36,30 @@ export default function Onboarding() {
   const router = useRouter();
   const { isLoaded, user } = useUser();
 
-  const [current, setCurrent] = useState(0);
-
   // Fetch food items to prompt the user for their preferences
   // const { foodList, isFoodLoading } = useFoodList();
   const { foodList, isFoodLoading } = useFoodList();
+  const [current, setCurrent] = useState(0);
 
   // liked (bool): true if user clicks "Yes", false if user clicks "No"
   function select(liked) {
     if (isFoodLoading) {
       return;
     }
+
+    // Asynchronously make a POST request to the swipe endpoint
+    // Depends on user state (`current`), but it'll work since the request is always
+    // queued before the state is updated
+    fetch(`/api/swipe_${liked ? "right" : "left"}`, {
+      headers: {
+        "Content-Type": "application/json", // ! Must set Content-Type for the API to parse body
+      },
+      method: "POST",
+      body: JSON.stringify({
+        clerkId: user.id,
+        objectId: foodList[current]._id,
+      }),
+    }).catch((error) => console.log(error));
 
     // Only allow the user to move to the next card if there's space available
     // Otherwise, redirect to the dashboard
