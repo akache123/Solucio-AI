@@ -1,104 +1,64 @@
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselApi,
-} from "../components/ui/carousel";
-import { Card, CardContent } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import axios from 'axios';
 import { useUser } from "@clerk/nextjs";
+import useSwr from "swr";
 
-const fetchFirstSwipes = async (setFoodList) => {
-  try {
-    const response = await axios.get('/api/generate-first-swipes');
-    console.log('Random objects:', response.data);
-    setFoodList(response.data);
-    console.log(response.data);
-  } catch (error) {
-    console.error('Error fetching random objects:', error);
-  }
-};
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
 
-const handleSwipeRight = async (id, user) => {
-  const objectId = {id};
-  try {
-    const response = await axios.post('/api/swipe_right', {
-      clerkId: user.id,
-      objectId: objectId
-    });
-    console.log('Response from /api/swipe_right:', response.data);
-  } catch (error) {
-    console.error('Error on swipe right:', error);
-  }
-};
+import { Check, LoaderCircle, X } from "lucide-react";
+
+function useFoodList() {
+  // https://swr.vercel.app/docs/getting-started
+
+  const { data, error, isLoading } = useSwr(
+    "/api/generate-first-swipes",
+    (...args) => fetch(...args).then((res) => res.json())
+  );
+
+  return {
+    foodList: data,
+    isFoodLoading: isLoading,
+    isFoodError: error,
+  };
+}
 
 export default function Onboarding() {
   const router = useRouter();
-
-  const [api, setApi] = useState();
-  const [count, setCount] = useState(0);
-  const [current, setCurrent] = useState(0);
-  const [foodList, setFoodList] = useState([]);
-
   const { isLoaded, user } = useUser();
 
-  // getting the first 10 items
-  useEffect(() => {
-    if (isLoaded && user) {
-      console.log("Clerk user ID:", user.id);
-      fetchFirstSwipes(setFoodList);
-    }
-  }, [isLoaded, user, setFoodList]);
+  const [current, setCurrent] = useState(0);
 
-  // Responsible for updating the text in-between both buttons
-  useEffect(() => {
-    if (!api) {
-      return;
-    }
+  // Fetch food items to prompt the user for their preferences
+  // const { foodList, isFoodLoading } = useFoodList();
+  const isFoodLoading = true;
+  const foodList = [
+    {
+      name: "Pizza",
+      cuisine: "Italian",
+    },
+  ];
 
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap() + 1);
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1);
-    });
-  }, [api]);
-
-  // Called when the user clicks either Yes or No buttons
-  // liked (bool): whether the user clicked "yes" (true) or "no" (false)
+  // liked (bool): true if user clicks "Yes", false if user clicks "No"
   function select(liked) {
-    if (!api) {
-      return;
-    }
-
-    console.log(
-      `User selected ${liked ? "Yes" : "No"} on item ${current}/${count}`
-    );
-
-    // If there are food items left, allow the user to scroll
-    // Otherwise, simply redirect them to the dashboard. This prevents them from re-clicking
-    // the buttons when they hit the last food item
-    if (api.canScrollNext()) {
-
-      if(liked == true){
-        handleSwipeRight(foodList[current]._id, user);
-        console.log(foodList[current]._id)
-      }
-
-      api.scrollNext();
+    // Only allow the user to move to the next card if there's space available
+    // Otherwise, redirect to the dashboard
+    if (current < foodList) {
+      setCurrent(current + 1);
     } else {
       router.push("/dashboard");
     }
-
   }
 
   return (
-    <div className="flex flex-row w-full">
-      <div className="w-3/5 p-4">
+    <div className="flex flex-row gap-4">
+      <div className="w-2/5 grow-0">
         <h1 className="scroll-m-20 pb-2 text-4xl font-semibold first:mt-0">
           Swipe to personalize your food
         </h1>
@@ -111,36 +71,17 @@ export default function Onboarding() {
 
       {/* NOTE: `watchDrag` enables/disables dragging to scroll
       https://www.embla-carousel.com/api/options/#watchdrag */}
-      <div className="flex justify-center w-full p-4">
+      <div className="flex-grow">
         <div className="flex flex-col">
-          <Carousel setApi={setApi} opts={{ watchDrag: false }}>
-            <CarouselContent>
-              {foodList.map((food, i) => (
-                <CarouselItem key={i}>
-                  <div className="p-1">
-                    <Card>
-                      <CardContent className="flex flex-col p-6">
-                        <div className="h-40 bg-gray-300 rounded-md flex justify-center items-center md:h-96">
-                          <span className="text-gray-500">
-                            Image Placeholder
-                          </span>
-                        </div>
-                        <div className="mt-6">
-                          <span className="text-3xl font-semibold">
-                            {food.name}
-                          </span>
-                          <br />
-                          <span className="text-md font-normal text-muted-foreground tracking-wide">
-                            {food.cuisine}
-                          </span>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
+          <Card className="">
+            <CardHeader>
+              <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center">
+                <span className="text-gray-500">Image Placeholder</span>
+              </div>
+              <CardTitle>{foodList[current].name}</CardTitle>
+              <CardDescription>{foodList[current].cuisine}</CardDescription>
+            </CardHeader>
+          </Card>
 
           <div className="flex flex-row justify-center items-center mt-3">
             <Button
@@ -152,9 +93,15 @@ export default function Onboarding() {
               <X className="w-4 h-4 text-red-800" />
             </Button>
 
-            <p className="text-center text-sm font-light text-secondary-foreground tracking-widest min-w-10 md:min-w-32">
-              {current}/{count}
-            </p>
+            <div className="min-w-10 md:min-w-32 flex items-center justify-center">
+              {isFoodLoading ? (
+                <LoaderCircle className="w-4 h-4 animate-spin text-center" />
+              ) : (
+                <p className="text-center text-sm font-light text-secondary-foreground ">
+                  {current + 1} / {foodList.length}
+                </p>
+              )}
+            </div>
 
             <Button
               variant="secondary"
