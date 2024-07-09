@@ -2,19 +2,14 @@ import * as React from "react"
 import Image from "next/image"
 import { useState } from 'react';
 import axios from 'axios';
-// import { MongoClient } from 'mongodb';
-import { Progress } from "@/components/ui/progress"
-
 
 import { useUser } from "@clerk/nextjs";
 
+
+import { Progress } from "@/components/ui/progress"
 import { Heart } from 'lucide-react';
 import { Maximize2 } from 'lucide-react';
- 
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
-
-import { useClerk } from '@clerk/clerk-react';
-
 import {
   Card,
   CardContent,
@@ -23,11 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-
-import { Bold } from "lucide-react"
- 
-import { Toggle } from "@/components/ui/toggle"
- 
 import {
   Dialog,
   DialogContent,
@@ -36,9 +26,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-
 import { Badge } from "@/components/ui/badge"
 
+// fetch the initial recommendations
 const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
   isFoodLoading(true);
   if (user) {
@@ -58,6 +48,20 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
   }
 };
 
+// handling liked food items
+const handleLiked = async (user, objectId) => {
+  console.log('onject ID', objectId);
+  try {
+    const response = await axios.post('/api/liked', {
+      clerkId: user.id,
+      objectId: objectId
+    });
+    console.log('Response from /api/liked:', response.data);
+  } catch (error) {
+    console.error('Error on liked:', error);
+  }
+};
+
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
   const [foodList, setFoodList] = useState([]);
@@ -67,15 +71,19 @@ export default function Dashboard() {
 
   const [liked, setLiked] = useState(Array(hearts.length).fill(false));
   
-  const heartClicked = (heartIndex) => {
+  // heart clicked function
+  const heartClicked = (heartIndex, objectId) => {
     console.log(heartIndex)
     if (isLoaded && user) {
       console.log("Clerk user ID:", user.id);
       const newLiked = liked.map((item, i) => (i === heartIndex ? !item : item));
+      
       setLiked(newLiked);
+      handleLiked(user, objectId);
     }
   };
 
+  // initially load the data
   React.useEffect(() => {
     if (isLoaded && user) {
       console.log("Clerk user ID:", user.id);
@@ -114,7 +122,7 @@ export default function Dashboard() {
                     fill: liked[index] ? 'red' : 'none', 
                     cursor: 'pointer', 
                     marginRight: '10px' 
-                  }} onClick={()=>heartClicked(index)}/>
+                  }} onClick={()=>heartClicked(index, fooditem._id)}/>
                   <Dialog>
                     <DialogTrigger><Maximize2 /></DialogTrigger>
                     <DialogContent>
