@@ -3,6 +3,7 @@ import Image from "next/image"
 import { useState } from 'react';
 import axios from 'axios';
 // import { MongoClient } from 'mongodb';
+import { Progress } from "@/components/ui/progress"
 
 
 import { useUser } from "@clerk/nextjs";
@@ -38,9 +39,8 @@ import {
 
 import { Badge } from "@/components/ui/badge"
 
-const fetchRecommendations = async (user, setFoodList) => {
-  console.log("here!");
-  console.log("here!");
+const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
+  isFoodLoading(true);
   if (user) {
     try {
       const clerkId = user.id; 
@@ -50,53 +50,18 @@ const fetchRecommendations = async (user, setFoodList) => {
       setFoodList(response.data);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
+    } finally {
+      isFoodLoading(false);
     }
   } else {
     console.error('User not signed in');
   }
 };
 
-// const foodList = [
-//   {
-//     id: 1,
-//     name: "pizza",
-//     cuisine: "Italian",
-//     tags: ["spicy", "contains-egg", "cheese"],
-//   },
-//   {
-//     id: 2,
-//     name: "burger",
-//     cuisine: "american",
-//     tags: ["spicy", "contains-egg", "cheese"],
-//   },
-//   {
-//     id: 3,
-//     name: "noodles",
-//     cuisine: "chinese",
-//     tags: ["spicy", "contains-egg", "cheese"],
-//   },
-//   {
-//     id: 4,
-//     name: "pizza",
-//     cuisine: "Italian",
-//     tags: ["spicy", "contains-egg", "cheese"],
-//   },
-//   {
-//     id: 5,
-//     name: "burger",
-//     cuisine: "american",
-//     tags: ["spicy", "contains-egg", "cheese"],
-//   },
-//   {
-//     id: 6,
-//     name: "noodles",
-//     cuisine: "chinese",
-//     tags: ["spicy", "contains-egg", "cheese"],
-//   }];
-
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
   const [foodList, setFoodList] = useState([]);
+  const [foodLoading, isFoodLoading] = useState();
   
   const hearts = Array(foodList.length).fill(null);
 
@@ -114,12 +79,23 @@ export default function Dashboard() {
   React.useEffect(() => {
     if (isLoaded && user) {
       console.log("Clerk user ID:", user.id);
-      fetchRecommendations(user, setFoodList);
+      fetchRecommendations(user, setFoodList, isFoodLoading);
     }
   }, [isLoaded, user, setFoodList]);
 
   return (
     <div>
+      {foodLoading ? (
+          <div className="flex items-center justify-center min-h-screen">
+          <div className="w-1/2 text-center"> {/* Adjust the width as needed */}
+            <div className="scroll-m-20 pb-5 text-3xl font-semibold tracking-tight first:mt-0 p-4">
+              loading your recommendations:
+            </div>
+            <Progress value={70} />
+          </div>
+        </div>
+        ) : (
+          <div>
       <div className="scroll-m-20 pb-2 text-4xl font-semibold tracking-tight first:mt-0">Your Recommendations</div>
       <div className="flex items-center justify-center min-h-screen">
         <ScrollArea className="w-[60%] rounded-md border">
@@ -168,6 +144,8 @@ export default function Dashboard() {
         </div>
         </ScrollArea>
       </div>
+   </div>
+        )};
     </div>
   );
 }
