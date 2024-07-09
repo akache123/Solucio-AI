@@ -100,7 +100,7 @@ export default function Dashboard() {
         handleDeleteLiked(user, objectId);
       }
     }
-  };
+  }; 
 
   // initially load the data
   React.useEffect(() => {
