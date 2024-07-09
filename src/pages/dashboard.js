@@ -62,6 +62,19 @@ const handleLiked = async (user, objectId) => {
   }
 };
 
+const handleDeleteLiked = async (user, objectId) => {
+  console.log('onject ID', objectId);
+  try {
+    const response = await axios.post('/api/delete_liked', {
+      clerkId: user.id,
+      objectId: objectId
+    });
+    console.log('Response from /api/delete_liked:', response.data);
+  } catch (error) {
+    console.error('Error on delete_liked:', error);
+  }
+};
+
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
   const [foodList, setFoodList] = useState([]);
@@ -73,13 +86,19 @@ export default function Dashboard() {
   
   // heart clicked function
   const heartClicked = (heartIndex, objectId) => {
-    console.log(heartIndex)
+    console.log(heartIndex);
     if (isLoaded && user) {
       console.log("Clerk user ID:", user.id);
-      const newLiked = liked.map((item, i) => (i === heartIndex ? !item : item));
-      
+      // const newLiked = liked.map((item, i) => (i === heartIndex ? !item : item));
+      const newLiked = [...liked];
+      newLiked[heartIndex] = !newLiked[heartIndex];
+      console.log(newLiked[heartIndex]);
       setLiked(newLiked);
-      handleLiked(user, objectId);
+      if(newLiked[heartIndex] === true){
+        handleLiked(user, objectId);
+      } else {
+        handleDeleteLiked(user, objectId);
+      }
     }
   };
 
@@ -110,7 +129,6 @@ export default function Dashboard() {
         <div className="p-4">
           {foodList.map((fooditem, index) => (
             <div key={fooditem._id} className="flex border rounded-md mb-4">
-            {/* <img src={imageUrl} alt={name} className="w-1/3 object-cover rounded-l-md" /> */}
             <div className="w-1/3 h-48 bg-gray-300 rounded-l-md flex items-center pl-4">
               <span className="text-gray-500">Image Placeholder</span>
             </div>
