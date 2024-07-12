@@ -89,7 +89,7 @@ export default function Onboarding() {
         <div className="flex flex-col">
           <Card className="">
             <CardHeader>
-              {isFoodLoading ? (
+              {isFoodLoading || foodList === undefined ? (
                 <>
                   <div className="h-80 mb-4 bg-gray-300 rounded-md flex justify-center items-center animate-pulse">
                     <span className="text-gray-500">Loading Image</span>
