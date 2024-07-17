@@ -104,6 +104,7 @@ export default function Dashboard() {
       if(newLiked[heartIndex] === true){
         handleLiked(user, objectId);
       }
+      // fix the 500 error for delete like
       // } else {
       //   handleDeleteLiked(user, objectId);
       // }
