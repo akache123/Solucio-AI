@@ -45,7 +45,7 @@ async function generateQueryVector(likedItems, dislikedItems) {
 export default async function handler(req, res) {
     if (req.method === 'POST') {
         const clerkId = req.query.clerkID;
-        const { latitude, longitude } = req.body; // Extract coordinates from request body
+        const { latitude, longitude, timeOfDay } = req.body; 
         const uri = process.env.MONGO_URI;
         const client = new MongoClient(uri);
   
@@ -118,9 +118,9 @@ export default async function handler(req, res) {
               const response = await openAI.chat.completions.create({
                 model: "gpt-3.5-turbo",
                 messages: [
-                    { role: "system", content: "You are a helpful assistant." },
+                    { role: "system", content: "You can help you find the best food recommendations." },
                     { role: "user", content: prompt },
-                    { role: "user", content: JSON.stringify({ coordinates: { latitude, longitude }, data: result }) },
+                    { role: "user", content: JSON.stringify({ coordinates: { latitude, longitude }, timeOfDay, data: result }) },
                 ],
             });
 
