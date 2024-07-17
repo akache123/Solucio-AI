@@ -61,19 +61,19 @@ const handleLiked = async (user, objectId) => {
   }
 };
 
-// handling deleting liked food items
-const handleDeleteLiked = async (user, objectId) => {
-  console.log('onject ID', objectId);
-  try {
-    const response = await axios.post('/api/delete_liked', {
-      clerkId: user.id,
-      objectId: objectId
-    });
-    console.log('Response from /api/delete_liked:', response.data);
-  } catch (error) {
-    console.error('Error on delete_liked:', error);
-  }
-};
+// // handling deleting liked food items
+// const handleDeleteLiked = async (user, objectId) => {
+//   console.log('onject ID', objectId);
+//   try {
+//     const response = await axios.post('/api/delete_liked', {
+//       clerkId: user.id,
+//       objectId: objectId
+//     });
+//     console.log('Response from /api/delete_liked:', response.data);
+//   } catch (error) {
+//     console.error('Error on delete_liked:', error);
+//   }
+// };
 
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
@@ -103,9 +103,10 @@ export default function Dashboard() {
       setLiked(newLiked);
       if(newLiked[heartIndex] === true){
         handleLiked(user, objectId);
-      } else {
-        handleDeleteLiked(user, objectId);
       }
+      // } else {
+      //   handleDeleteLiked(user, objectId);
+      // }
     }
   }; 
 
