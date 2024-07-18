@@ -118,7 +118,7 @@ export default async function handler(req, res) {
               const response = await openAI.chat.completions.create({
                 model: "gpt-3.5-turbo",
                 messages: [
-                    { role: "system", content: "You can help you find the best food recommendations." },
+                    { role: "system", content: "You can help find the best food recommendations." },
                     { role: "user", content: prompt },
                     { role: "user", content: JSON.stringify({ coordinates: { latitude, longitude }, timeOfDay, data: result }) },
                 ],
