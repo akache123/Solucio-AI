@@ -93,6 +93,29 @@
   };
   ```
 
+### 1c. `/api/check-liked`
+
+- **Purpose:** Checks which recommendations were liked previously
+- **Method:** POST
+- **Parameters:**
+  - \`clerkId\`: ID of the Clerk user performing the action.
+  - \`objects\`: List of objects
+- **Usage Example:**
+```javascript
+  const extractAndCheckRecommendations = async () => {
+    const ids = objects.slice(0, 15).map(item => item._id);
+    try {
+      const response = await axios.post('/api/heck-liked', {
+        clerkId: user.id,
+        ids
+      });
+      console.log('Response from /api/check-liked:', response.data);
+    } catch (error) {
+      console.error('Error checking recommendations:', error);
+    }
+  };
+  ```
+
 ### 2. `/api/load_data` DO NOT USE - IGNORE
 
 - **Purpose:** Loads data based on latitude and longitude.

@@ -50,9 +50,7 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
 // Handle extracting IDs and calling the new endpoint
 const extractAndCheckRecommendations = async (user, foodList, setLiked) => {
   if (!user) return;
-  
   const ids = foodList.slice(0, 15).map(item => item._id);
-
   try {
     const response = await axios.post('/api/check-liked', {
       clerkId: user.id,
