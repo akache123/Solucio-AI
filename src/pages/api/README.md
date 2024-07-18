@@ -176,6 +176,16 @@
 - **Method:** POST
 - **Parameters:**
   - \`clerkId\`: ID of the Clerk user.
+
+- **Request Body:**
+  - \`latitude:\` Latitude of the user's current location.
+  - \`longitude:\` Longitude of the user's current location.
+  - \`timeOfDay:\` The time of day when the request is made (e.g., "Breakfast", "Lunch", "Dinner").
+
+- **Response Body:**
+  JSON object containing the recommended food item with various attributes.
+
+
 - **Usage Example:**
 ```javascript
   const sendRecommendationRequest = async () => {
@@ -183,14 +193,14 @@
       navigator.geolocation.getCurrentPosition(async (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
-
+        const timeOfDay = "Lunch";
         try {
           const response = await fetch(\'/api/generate-single-recommendation/\${user.id}\', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ latitude, longitude })
+            body: JSON.stringify({ latitude, longitude, timeOfDay })
           });
 
           const result = await response.json();
