@@ -47,6 +47,27 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
   }
 };
 
+// Handle extracting IDs and calling the new endpoint
+const extractAndCheckRecommendations = async (user, foodList, setLiked) => {
+  if (!user) return;
+  
+  const ids = foodList.slice(0, 15).map(item => item._id);
+
+  try {
+    const response = await axios.post('/api/check-liked', {
+      clerkId: user.id,
+      ids
+    });
+    console.log('Response from /api/check-liked:', response.data);
+
+    const likedStatus = response.data.results.map(item => item.exists);
+    setLiked(likedStatus);
+
+  } catch (error) {
+    console.error('Error checking recommendations:', error);
+  }
+};
+
 // handling liked food items
 const handleLiked = async (user, objectId) => {
   console.log('onject ID', objectId);
@@ -61,19 +82,19 @@ const handleLiked = async (user, objectId) => {
   }
 };
 
-// // handling deleting liked food items
-// const handleDeleteLiked = async (user, objectId) => {
-//   console.log('onject ID', objectId);
-//   try {
-//     const response = await axios.post('/api/delete_liked', {
-//       clerkId: user.id,
-//       objectId: objectId
-//     });
-//     console.log('Response from /api/delete_liked:', response.data);
-//   } catch (error) {
-//     console.error('Error on delete_liked:', error);
-//   }
-// };
+// handling deleting liked food items
+const handleDeleteLiked = async (user, objectId) => {
+  console.log('onject ID', objectId);
+  try {
+    const response = await axios.post('/api/delete_liked', {
+      clerkId: user.id,
+      objectId: objectId
+    });
+    console.log('Response from /api/delete_liked:', response.data);
+  } catch (error) {
+    console.error('Error on delete_liked:', error);
+  }
+};
 
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
@@ -82,7 +103,8 @@ export default function Dashboard() {
   
   const hearts = Array(foodList.length).fill(null);
 
-  const [liked, setLiked] = useState(Array(hearts.length).fill(false));
+  // const [liked, setLiked] = useState(Array(hearts.length).fill(false));
+  const [liked, setLiked] = useState([]);
 
   // initially load the data
   React.useEffect(() => {
@@ -91,6 +113,13 @@ export default function Dashboard() {
       fetchRecommendations(user, setFoodList, isFoodLoading);
     }
   }, [isLoaded, user, setFoodList]);
+
+  // Extract IDs and call the new endpoint when loading is done
+  React.useEffect(() => {
+    if (!foodLoading && user) {
+      extractAndCheckRecommendations(user, foodList, setLiked);
+    }
+  }, [foodLoading, foodList, user]);
   
   // heart clicked function
   const heartClicked = (heartIndex, objectId) => {
@@ -103,11 +132,10 @@ export default function Dashboard() {
       setLiked(newLiked);
       if(newLiked[heartIndex] === true){
         handleLiked(user, objectId);
-      }
       // fix the 500 error for delete like
-      // } else {
-      //   handleDeleteLiked(user, objectId);
-      // }
+      } else {
+        handleDeleteLiked(user, objectId);
+      }
     }
   }; 
 
