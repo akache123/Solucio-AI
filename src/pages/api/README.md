@@ -45,7 +45,8 @@
     } catch (error) {
       console.error('Error on swipe left:', error);
     }
-  };```
+  };
+  ```
 
 ### 1c. `/api/liked`
 
@@ -89,6 +90,29 @@
       console.log('Response from /api/delete_liked:', response.data);
     } catch (error) {
       console.error('Error on delete_liked:', error);
+    }
+  };
+  ```
+
+### 1c. `/api/check-liked`
+
+- **Purpose:** Checks which recommendations were liked previously
+- **Method:** POST
+- **Parameters:**
+  - \`clerkId\`: ID of the Clerk user performing the action.
+  - \`objects\`: List of objects
+- **Usage Example:**
+```javascript
+  const extractAndCheckRecommendations = async () => {
+    const ids = objects.slice(0, 15).map(item => item._id);
+    try {
+      const response = await axios.post('/api/heck-liked', {
+        clerkId: user.id,
+        ids
+      });
+      console.log('Response from /api/check-liked:', response.data);
+    } catch (error) {
+      console.error('Error checking recommendations:', error);
     }
   };
   ```
@@ -152,7 +176,8 @@
     } else {
       console.error('User not signed in');
     }
-  };```
+  };
+  ```
 
 ### 5. `/api/change-to-embed` DO NOT USE - IGNORE
 

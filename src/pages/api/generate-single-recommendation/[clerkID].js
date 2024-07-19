@@ -125,10 +125,17 @@ export default async function handler(req, res) {
             });
 
             const generatedContent = response.choices[0].message.content;
+            console.log('generatedContent:', generatedContent)
 
-            console.log(generatedContent)
+            const parsedContent = generatedContent.replace(/^```json\s*|\s*```$/g, '').trim();
 
-            res.status(200).json(generatedContent);
+            console.log('parsedContent:', parsedContent)
+
+            const returnContent = JSON.parse(parsedContent);
+            // console.log(parsedContent);
+            res.status(200).json(returnContent);
+
+            // res.status(200).json(generatedContent);
         } catch (error) {
             console.error('Failed to generate recommendations:', error);
             res.status(500).json({ error: 'Failed to generate recommendations' });
