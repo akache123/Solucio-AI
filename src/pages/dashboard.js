@@ -47,7 +47,7 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
   }
 };
 
-// fetch the initial recommendations
+// Check which recommendations were previously liked
 const sendRecommendationRequest = async (user, setPremiumRecommendation, setPremiumRecommendationLoading) => {
   setPremiumRecommendationLoading(true)
   if (navigator.geolocation) {
@@ -138,15 +138,13 @@ export default function Dashboard() {
   
   const [liked, setLiked] = useState([]);
 
-  const [item, setItem] = useState();
-
   // initially load the data
   React.useEffect(() => {
     if (isLoaded && user) {
       fetchRecommendations(user, setFoodList, isFoodLoading);
       sendRecommendationRequest(user, setPremiumRecommendation, setPremiumRecommendationLoading);
     }
-  }, [isLoaded, user, setFoodList, setPremiumRecommendation,]);
+  }, [isLoaded, user, setFoodList, setPremiumRecommendation, setPremiumRecommendationLoading]);
 
   // Extract IDs and call the new endpoint when loading is done
   React.useEffect(() => {
@@ -154,11 +152,6 @@ export default function Dashboard() {
       extractAndCheckRecommendations(user, foodList, setLiked);
     }
   }, [foodLoading, foodList, user]);
-
-  React.useEffect(() => {
-    setItem(premiumRecommendation);
-  }, [premiumRecommendation, setItem]);
-  
   
   // heart clicked function
   const heartClicked = (heartIndex, objectId) => {
