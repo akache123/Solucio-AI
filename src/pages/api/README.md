@@ -45,7 +45,8 @@
     } catch (error) {
       console.error('Error on swipe left:', error);
     }
-  };```
+  };
+  ```
 
 ### 1c. `/api/liked`
 
@@ -175,7 +176,8 @@
     } else {
       console.error('User not signed in');
     }
-  };```
+  };
+  ```
 
 ### 5. `/api/change-to-embed` DO NOT USE - IGNORE
 

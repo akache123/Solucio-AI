@@ -35,7 +35,6 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
       const clerkId = user.id; 
       const url = `/api/generate-recommendations/${clerkId}`;
       const response = await axios.post(url);
-      console.log('Recommendations:', response.data);
       setFoodList(response.data);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
@@ -44,6 +43,41 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
     }
   } else {
     console.error('User not signed in');
+  }
+};
+
+const sendRecommendationRequest = async (user, setPremiumRecommendation, setPremiumRecommendationLoading) => {
+  setPremiumRecommendationLoading(true)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      const timeOfDay = "Lunch";
+      try {
+        const response = await fetch(`/api/generate-single-recommendation/${user.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ latitude, longitude, timeOfDay })
+        });
+
+        const result = await response.json();
+        await setPremiumRecommendation(result);
+        console.log("single recommendattion:", result);
+        console.log("single recommendattion:", result.length);
+        setPremiumRecommendationLoading(false)
+      } catch (error) {
+        console.error('Error sending recommendation request:', error);
+        setPremiumRecommendationLoading(false)
+      }
+    }, (error) => {
+      console.error('Error getting location', error);
+      setPremiumRecommendationLoading(false)
+    });
+  } else {
+    console.error('Geolocation is not supported by this browser.');
+    setPremiumRecommendationLoading(false)
   }
 };
 
@@ -56,7 +90,6 @@ const extractAndCheckRecommendations = async (user, foodList, setLiked) => {
       clerkId: user.id,
       ids
     });
-    console.log('Response from /api/check-liked:', response.data);
 
     const likedStatus = response.data.results.map(item => item.exists);
     setLiked(likedStatus);
@@ -68,7 +101,6 @@ const extractAndCheckRecommendations = async (user, foodList, setLiked) => {
 
 // handling liked food items
 const handleLiked = async (user, objectId) => {
-  console.log('onject ID', objectId);
   try {
     const response = await axios.post('/api/liked', {
       clerkId: user.id,
@@ -82,7 +114,6 @@ const handleLiked = async (user, objectId) => {
 
 // handling deleting liked food items
 const handleDeleteLiked = async (user, objectId) => {
-  console.log('onject ID', objectId);
   try {
     const response = await axios.post('/api/delete_liked', {
       clerkId: user.id,
@@ -97,20 +128,23 @@ const handleDeleteLiked = async (user, objectId) => {
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
   const [foodList, setFoodList] = useState([]);
+
+  const [premiumRecommendation, setPremiumRecommendation] = useState([]);
+  const [premiumRecommendationLoading, setPremiumRecommendationLoading] = useState();
+
   const [foodLoading, isFoodLoading] = useState();
   
-  const hearts = Array(foodList.length).fill(null);
-
-  // const [liked, setLiked] = useState(Array(hearts.length).fill(false));
   const [liked, setLiked] = useState([]);
+
+  const [item, setItem] = useState();
 
   // initially load the data
   React.useEffect(() => {
     if (isLoaded && user) {
-      console.log("Clerk user ID:", user.id);
       fetchRecommendations(user, setFoodList, isFoodLoading);
+      sendRecommendationRequest(user, setPremiumRecommendation, setPremiumRecommendationLoading);
     }
-  }, [isLoaded, user, setFoodList]);
+  }, [isLoaded, user, setFoodList, setPremiumRecommendation,]);
 
   // Extract IDs and call the new endpoint when loading is done
   React.useEffect(() => {
@@ -118,15 +152,17 @@ export default function Dashboard() {
       extractAndCheckRecommendations(user, foodList, setLiked);
     }
   }, [foodLoading, foodList, user]);
+
+  React.useEffect(() => {
+    setItem(premiumRecommendation);
+  }, [premiumRecommendation, setItem]);
+  
   
   // heart clicked function
   const heartClicked = (heartIndex, objectId) => {
-    console.log(heartIndex);
     if (isLoaded && user) {
-      console.log("Clerk user ID:", user.id);
       const newLiked = [...liked];
       newLiked[heartIndex] = !newLiked[heartIndex];
-      console.log(newLiked[heartIndex]);
       setLiked(newLiked);
       if(newLiked[heartIndex] === true){
         handleLiked(user, objectId);
@@ -139,7 +175,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      {foodLoading ? (
+      {foodLoading && premiumRecommendationLoading? (
           <div className="flex items-center justify-center min-h-screen">
             <div className="w-1/2 text-center">
               <div className="scroll-m-20 pb-5 text-3xl font-semibold tracking-tight first:mt-0 p-4">
@@ -151,9 +187,33 @@ export default function Dashboard() {
       ) : (
         <div>
           <div className="scroll-m-20 pb-2 text-4xl font-semibold tracking-tight first:mt-0">Your Recommendations</div>
+          <CardHeader>
+          {premiumRecommendation.length > 0 && (
+            <div className="flex">
+              <CardTitle style={{ marginRight: '10px' }}>{premiumRecommendation[0]}</CardTitle>
+              <Dialog>
+                <DialogTrigger><Maximize2 /></DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>more info!</DialogTitle>
+                    <DialogDescription>
+                      more information will come soon
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
+          <CardDescription>{premiumRecommendation[0]}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p>description</p>
+        </CardContent>
+
           <div className="flex items-center justify-center min-h-screen">
             <ScrollArea className="w-[60%] rounded-md border">
               <div className="p-4">
+                
                 {foodList.map((fooditem, index) => (
                   <div key={fooditem._id} className="flex border rounded-md mb-4">
                     <div className="w-1/3 h-48 bg-gray-300 rounded-l-md flex items-center pl-4">

@@ -128,7 +128,11 @@ export default async function handler(req, res) {
 
             console.log(generatedContent)
 
+            // const parsedContent = JSON.parse(generatedContent);
+            // console.log(parsedContent);
             res.status(200).json(generatedContent);
+
+            // res.status(200).json(generatedContent);
         } catch (error) {
             console.error('Failed to generate recommendations:', error);
             res.status(500).json({ error: 'Failed to generate recommendations' });
