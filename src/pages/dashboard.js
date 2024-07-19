@@ -190,7 +190,7 @@ export default function Dashboard() {
           <CardHeader>
           {premiumRecommendation.length > 0 && (
             <div className="flex">
-              <CardTitle style={{ marginRight: '10px' }}>{premiumRecommendation[0]}</CardTitle>
+              <CardTitle style={{ marginRight: '10px' }}>{premiumRecommendation[0]?.name}</CardTitle>
               <Dialog>
                 <DialogTrigger><Maximize2 /></DialogTrigger>
                 <DialogContent>
@@ -204,7 +204,7 @@ export default function Dashboard() {
               </Dialog>
             </div>
           )}
-          <CardDescription>{premiumRecommendation[0]}</CardDescription>
+          <CardDescription>{premiumRecommendation[0]?.name}</CardDescription>
         </CardHeader>
         <CardContent>
           <p>description</p>
