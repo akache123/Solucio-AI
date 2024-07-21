@@ -241,3 +241,49 @@
     }
   };
   ```
+
+  ### `/api/thumbs_up`
+
+- **Purpose:** Handles thumbs up action.
+- **Method:** POST
+- **Parameters:**
+  - `clerkId`: ID of the Clerk user performing the action.
+  - `objectId`: ID of the object being given a thumbs up.
+- **Usage Example:**
+  ```javascript
+  const handleThumbsUp = async () => {
+    const objectId = '6683a5ed53238178ac59b76f';
+    try {
+      const response = await axios.post('/api/thumbs_up', {
+        clerkId: user.id,
+        objectId: objectId
+      });
+      console.log('Response from /api/thumbs_up:', response.data);
+    } catch (error) {
+      console.error('Error on thumbs up:', error);
+    }
+  };
+  ```
+
+### `/api/thumbs_down`
+
+- **Purpose:** Handles thumbs down action.
+- **Method:** POST
+- **Parameters:**
+  - `clerkId`: ID of the Clerk user performing the action.
+  - `objectId`: ID of the object being given a thumbs down.
+- **Usage Example:**
+  ```javascript
+  const handleThumbsDown = async () => {
+    const objectId = '6683a5ed53238178ac59b76f';
+    try {
+      const response = await axios.post('/api/thumbs_down', {
+        clerkId: user.id,
+        objectId: objectId
+      });
+      console.log('Response from /api/thumbs_down:', response.data);
+    } catch (error) {
+      console.error('Error on thumbs down:', error);
+    }
+  };
+```
