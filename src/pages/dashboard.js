@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress"
 import { Heart } from 'lucide-react';
 import { Sparkles } from 'lucide-react';
 import { Maximize2 } from 'lucide-react';
+import { ThumbsDown } from 'lucide-react';
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import {
   Card,
@@ -93,7 +94,7 @@ const sendRecommendationRequest = async (user, setPremiumRecommendation, setPrem
 };
 
 // Handle extracting IDs and calling the new endpoint
-const extractAndCheckRecommendations = async (user, foodList, setLiked) => {
+const extractAndCheckLiked = async (user, foodList, setLiked) => {
   if (!user) return;
   const ids = foodList.slice(0, 15).map(item => item._id);
   try {
@@ -104,6 +105,23 @@ const extractAndCheckRecommendations = async (user, foodList, setLiked) => {
 
     const likedStatus = response.data.results.map(item => item.exists);
     setLiked(likedStatus);
+
+  } catch (error) {
+    console.error('Error checking recommendations:', error);
+  }
+};
+
+const extractAndCheckThumbsDown = async (user, foodList, setThumbsDown) => {
+  if (!user) return;
+  const ids = foodList.slice(0, 15).map(item => item._id);
+  try {
+    const response = await axios.post('/api/check-thumbsDown', {
+      clerkId: user.id,
+      ids
+    });
+
+    const thumbsDownStatus = response.data.results.map(item => item.exists);
+    setThumbsDown(thumbsDownStatus);
 
   } catch (error) {
     console.error('Error checking recommendations:', error);
@@ -136,16 +154,41 @@ const handleDeleteLiked = async (user, objectId) => {
   }
 };
 
+const handleThumbsDown = async (user, objectId) => {
+  try {
+    const response = await axios.post('/api/thumbs_down', {
+      clerkId: user.id,
+      objectId: objectId
+    });
+    console.log('Response from /api/thumbs_down:', response.data);
+  } catch (error) {
+    console.error('Error on thumbs down:', error);
+  }
+};
+
+const handleThumbsUp = async (user, objectId) => {
+  try {
+    const response = await axios.post('/api/thumbs_up', {
+      clerkId: user.id,
+      objectId: objectId
+    });
+    console.log('Response from /api/thumbs_up:', response.data);
+  } catch (error) {
+    console.error('Error on thumbs up:', error);
+  }
+};
+
 export default function Dashboard() {
   const { isLoaded, user } = useUser();
   const [foodList, setFoodList] = useState([]);
+  const [foodLoading, isFoodLoading] = useState(false);
 
   const [premiumRecommendation, setPremiumRecommendation] = useState(null);
   const [premiumRecommendationLoading, setPremiumRecommendationLoading] = useState(false);
-
-  const [foodLoading, isFoodLoading] = useState(false);
   
   const [liked, setLiked] = useState([]);
+
+  const [thumbsDown, setThumbsDown] = useState([]);
 
   // initially load the data
   React.useEffect(() => {
@@ -158,7 +201,8 @@ export default function Dashboard() {
   // Extract IDs and call the new endpoint when loading is done
   React.useEffect(() => {
     if (!foodLoading && user) {
-      extractAndCheckRecommendations(user, foodList, setLiked);
+      extractAndCheckLiked(user, foodList, setLiked);
+      extractAndCheckThumbsDown(user, foodList, setThumbsDown);
     }
   }, [foodLoading, foodList, user]);
   
@@ -173,6 +217,19 @@ export default function Dashboard() {
       // fix the 500 error for delete like
       } else {
         handleDeleteLiked(user, objectId);
+      }
+    }
+  }; 
+
+  const thumbsDownClicked = (thumbsDownIndex, objectId) => {
+    if (isLoaded && user) {
+      const newThumbsDown = [...thumbsDown];
+      newThumbsDown[thumbsDownIndex] = !newThumbsDown[thumbsDownIndex];
+      setThumbsDown(newThumbsDown);
+      if(newThumbsDown[thumbsDownIndex] === true){
+        handleThumbsDown(user, objectId);
+      } else {
+        handleThumbsUp(user, objectId);
       }
     }
   }; 
@@ -281,17 +338,14 @@ export default function Dashboard() {
                             cursor: 'pointer', 
                             marginRight: '10px' 
                           }} onClick={()=>heartClicked(index, fooditem._id)}/>
-                          <Dialog>
-                            <DialogTrigger><Maximize2 /></DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>more info!</DialogTitle>
-                                <DialogDescription>
-                                  more information will come soon
-                                </DialogDescription>
-                              </DialogHeader>
-                            </DialogContent>
-                          </Dialog>
+                          <ThumbsDown
+                            className={thumbsDown[index] ? 'shadow-[0_0_10px_rgba(255,0,0,0.8)]' : ''}
+                            style={{
+                              cursor: 'pointer',
+                              marginRight: '10px',
+                            }}
+                            onClick={() => thumbsDownClicked(index, fooditem._id)}
+                          />
                         </div>
                         <CardDescription>{fooditem.cuisine}</CardDescription>
                       </CardHeader>

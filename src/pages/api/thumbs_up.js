@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
             await thumbsDownCollection.insertOne(document);
 
-            res.status(200).json({ message: 'Thumbs down successfully recorded with object data' });
+            res.status(200).json({ message: 'Thumbs up successfully recorded with object data' });
         } catch (error) {
             console.error('Database connection error', error);
             res.status(500).json({ error: 'Failed to connect to the database' });
