@@ -1,21 +1,30 @@
-// pages/api/generate-recommendations/[clerkId].js
 import { MongoClient } from 'mongodb';
 
 async function fetchRecentItems(db, collectionName, limit) {
+    console.log(`Fetching recent items from collection: ${collectionName}, limit: ${limit}`);
     const collection = db.collection(collectionName);
-    return collection.find({}, { projection: { content_embedding: 1 } })
+    const items = await collection.find({}, { projection: { content_embedding: 1 } })
                     .sort({ timestamp: -1 })
                     .limit(limit)
                     .toArray();
+    console.log(`Fetched items from ${collectionName}:`, items);
+    return items;
 }
 
 function meanVector(vectors) {
+    console.log('Calculating mean vector for:', vectors);
+    if (vectors.length === 0) return [];
     const sumVector = vectors.reduce((acc, vec) => acc.map((a, i) => a + vec[i]), Array(vectors[0].length).fill(0));
-    return sumVector.map(x => x / vectors.length);
+    const meanVec = sumVector.map(x => x / vectors.length);
+    console.log('Mean vector:', meanVec);
+    return meanVec;
 }
 
 function invertVector(vector) {
-    return vector.map(x => -x);
+    console.log('Inverting vector:', vector);
+    const invertedVec = vector.map(x => -x);
+    console.log('Inverted vector:', invertedVec);
+    return invertedVec;
 }
 
 async function generateQueryVector(likedItems, dislikedItems) {
@@ -36,13 +45,18 @@ async function generateQueryVector(likedItems, dislikedItems) {
     if (dislikedVectors.length > 0) {
         const dislikedMeanVector = meanVector(dislikedVectors);
         const dislikedInvertedVector = invertVector(dislikedMeanVector);
-        queryVector = queryVector.map((value, index) => value + dislikedInvertedVector[index]);
+        if (queryVector.length === 0) {
+            queryVector = dislikedInvertedVector;
+        } else {
+            queryVector = queryVector.map((value, index) => value + dislikedInvertedVector[index]);
+        }
     }
     console.log("queryVector:", queryVector);
     return queryVector;
 }
 
 function removeDuplicates(results) {
+    console.log('Removing duplicates from results:', results);
     const uniqueResults = [];
     const seenNames = new Set();
 
@@ -53,56 +67,77 @@ function removeDuplicates(results) {
         }
     });
 
+    console.log('Unique results:', uniqueResults);
     return uniqueResults;
 }
 
 export default async function handler(req, res) {
+    console.log('Request received:', req.method, req.query);
+
     if (req.method === 'POST') {
-        const clerkId = req.query.clerkId;
+        const clerkID = req.query.clerkID;
+        console.log('Clerk ID:', clerkID);
         const uri = process.env.MONGO_URI;
         const client = new MongoClient(uri);
 
         try {
+            console.log('Connecting to MongoDB...');
             await client.connect();
-            const db = client.db(clerkId);
+            console.log('Connected to MongoDB');
+            const db = client.db(clerkID);
             const solucioFoodDb = client.db('solucio-food');
 
             const likedItems = await fetchRecentItems(db, 'liked', 30);
-            console.log(likedItems);
             const thumbsUpItems = await fetchRecentItems(db, 'thumbs_up', 30);
-            console.log(thumbsUpItems);
             const swipeRightItems = await fetchRecentItems(db, 'swipe_right', 30);
-            console.log(swipeRightItems);
-
             const swipeLeftItems = await fetchRecentItems(db, 'swipe_left', 30);
-            console.log(swipeLeftItems);
             const thumbsDownItems = await fetchRecentItems(db, 'thumbs_down', 30);
-            console.log(thumbsDownItems);
 
-            const positiveItems = [...likedItems, ...swipeRightItems, ...thumbsUpItems];
-            const negativeItems = [...swipeLeftItems, ...thumbsDownItems];
+            const positiveItems = [...likedItems, ...swipeRightItems, ...(thumbsUpItems || [])];
+            console.log('Positive items:', positiveItems);
+            const negativeItems = [...swipeLeftItems, ...(thumbsDownItems || [])];
+            console.log('Negative items:', negativeItems);
 
             const queryVector = await generateQueryVector(positiveItems, negativeItems);
 
-            const results = await solucioFoodDb.collection('solucio-food-embeddings').aggregate([
-                {
-                    "$vectorSearch": {
-                        "index": "vector_index",
-                        "path": "content_embedding",
-                        "queryVector": queryVector,
-                        "numCandidates": 5000,
-                        "limit": 15
-                    }
-                }
-            ]).toArray();
+            console.log('Querying solucio-food-embeddings with vector:', queryVector);
+            if (queryVector.length === 0) {
+                throw new Error("Query vector is empty");
+            }
 
-            const uniqueResults = removeDuplicates(results);
+            let uniqueResults = [];
+            let attempts = 0;
+            const numCandidates = 5000;
+            const fetchLimit = 50; 
+
+            while (uniqueResults.length < 15 && attempts < 5) {
+                const results = await solucioFoodDb.collection('solucio-food-embeddings').aggregate([
+                    {
+                        "$vectorSearch": {
+                            "index": "vector_index",
+                            "path": "content_embedding",
+                            "queryVector": queryVector,
+                            "numCandidates": numCandidates,
+                            "limit": fetchLimit
+                        }
+                    }
+                ]).toArray();
+                console.log('Results from vector search:', results);
+
+                const filteredResults = results.slice(1);
+
+                uniqueResults = removeDuplicates([...uniqueResults, ...filteredResults]);
+                attempts++;
+            }
+
+            uniqueResults = uniqueResults.slice(0, 15);
 
             res.status(200).json(uniqueResults);
         } catch (error) {
             console.error('Failed to generate recommendations:', error);
             res.status(500).json({ error: 'Failed to generate recommendations' });
         } finally {
+            console.log('Closing MongoDB connection');
             await client.close();
         }
     } else {

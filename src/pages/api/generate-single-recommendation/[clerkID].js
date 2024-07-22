@@ -19,14 +19,11 @@ function invertVector(vector) {
 }
 
 async function generateQueryVector(likedItems, dislikedItems) {
-    console.log("Liked Items:", likedItems);
-    console.log("Disliked Items:", dislikedItems);
 
     const likedVectors = likedItems.map(item => item.content_embedding);
     const dislikedVectors = dislikedItems.map(item => item.content_embedding);
 
-    console.log("Liked Vectors:", likedVectors);
-    console.log("Disliked Vectors:", dislikedVectors);
+
 
     let queryVector = [];
     if (likedVectors.length > 0) {
@@ -38,7 +35,6 @@ async function generateQueryVector(likedItems, dislikedItems) {
         const dislikedInvertedVector = invertVector(dislikedMeanVector);
         queryVector = queryVector.map((value, index) => value + dislikedInvertedVector[index]);
     }
-    console.log("queryVector:", queryVector)
     return queryVector;
 }
 
@@ -58,19 +54,15 @@ export default async function handler(req, res) {
         
         
             const likedItems = await fetchRecentItems(db, 'liked', 30);
-            console.log(likedItems);
             const swipeRightItems = await fetchRecentItems(db, 'swipe_right', 30);
-            console.log(swipeRightItems);
 
             const swipeLeftItems = await fetchRecentItems(db, 'swipe_left', 30);
-            console.log(swipeLeftItems);
 
             const positiveItems = [...likedItems, ...swipeRightItems];
             const negativeItems = swipeLeftItems;
 
             const queryVector = await generateQueryVector(positiveItems, negativeItems);
 
-            console.log(latitude, longitude)
 
             const result = await solucioFoodDb.collection('solucio-food-embeddings').aggregate([
                 {
@@ -90,10 +82,10 @@ export default async function handler(req, res) {
               const prompt = `Using the following coordinates and the general food that the user likes, give me 5 restaraunts and the best item that they have that matches this description. Make sure to include exactly what is in it, use no generalities, always start the JSON with the exact name of the food item, focus on the food items, and include the information of the restaurant. Provide the data in raw JSON format only. Each item should have the following attributes without ever, ever, ever using '''json THIS IS SO IMPORTANT!! Also make sure to never give anything except pure json format:
 
               1. "name": The exact name of the food item (e.g., "Chicken Parmesan", "Veggie Pizza").
-              2. "restaurantName": The name of the restaurant.
-              3. "address": The address of the restaurant.
-              4. "website": The restaurant's website.
-              5. "phoneNumber": The restaurant's phone number.
+              2. "restaurantName": The name of the restaurant. Give exact.
+              3. "address": The address of the restaurant. Give exact.
+              4. "website": The restaurant's website. Give Exact.
+              5. "phoneNumber": The restaurant's phone number. Give Exact.
               6. "deliveryTime": The estimated delivery time (Options: "10-20 minutes", "20-30 minutes", "30-40 minutes", "40+ minutes").
               7. "cuisine": The type of cuisine (Options: "Italian", "Japanese", "Mexican", "Indian", "American", "Chinese", "Thai", "Mediterranean", "French", "Vietnamese").
               8. "taste": The primary taste profile (Options: "savory", "sweet", "umami", "bitter", "sour").
@@ -116,7 +108,7 @@ export default async function handler(req, res) {
               Given the following JSON data and coordinates, find the top 5 places that are open right now, deliver the fastest, and return them in the specified format. Structure each menu item in this JSON format with the specified attributes, ensuring that all fields are filled out where applicable.`
 
               const response = await openAI.chat.completions.create({
-                model: "gpt-3.5-turbo",
+                model: "gpt-4-turbo",
                 messages: [
                     { role: "system", content: "You can help find the best food recommendations." },
                     { role: "user", content: prompt },
@@ -125,11 +117,9 @@ export default async function handler(req, res) {
             });
 
             const generatedContent = response.choices[0].message.content;
-            console.log('generatedContent:', generatedContent)
 
             const parsedContent = generatedContent.replace(/^```json\s*|\s*```$/g, '').trim();
 
-            console.log('parsedContent:', parsedContent)
 
             const returnContent = JSON.parse(parsedContent);
             // console.log(parsedContent);

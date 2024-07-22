@@ -33,8 +33,8 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
   isFoodLoading(true);
   if (user) {
     try {
-      const clerkId = user.id; 
-      const url = `/api/generate-recommendations/${clerkId}`;
+      const url = `/api/generate-recommendations/${user.id}`;
+      console.log(url)
       const response = await axios.post(url);
       setFoodList(response.data);
     } catch (error) {
@@ -49,13 +49,21 @@ const fetchRecommendations = async (user, setFoodList, isFoodLoading) => {
 
 // Check which recommendations were previously liked
 const sendRecommendationRequest = async (user, setPremiumRecommendation, setPremiumRecommendationLoading) => {
-  setPremiumRecommendationLoading(true)
+  console.log('Starting recommendation request...');
+  setPremiumRecommendationLoading(true);
+  const startTime = Date.now();
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(async (position) => {
+      const geoTime = Date.now();
+      console.log(`Geolocation obtained in ${geoTime - startTime}ms`);
+
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
       const timeOfDay = "Lunch";
+
       try {
+        console.log('Sending request to server...');
         const response = await fetch(`/api/generate-single-recommendation/${user.id}`, {
           method: 'POST',
           headers: {
@@ -65,21 +73,22 @@ const sendRecommendationRequest = async (user, setPremiumRecommendation, setPrem
         });
 
         const result = await response.json();
-        await setPremiumRecommendation(result);
-        console.log("single recommendattion:", result);
-        console.log("single recommendattion:", result.length);
-        setPremiumRecommendationLoading(false)
+        const fetchTime = Date.now();
+        console.log(`Received response in ${fetchTime - geoTime}ms`);
+
+        setPremiumRecommendation(result);  // Ensure state is updated directly
+        setPremiumRecommendationLoading(false);
       } catch (error) {
         console.error('Error sending recommendation request:', error);
-        setPremiumRecommendationLoading(false)
+        setPremiumRecommendationLoading(false);
       }
     }, (error) => {
       console.error('Error getting location', error);
-      setPremiumRecommendationLoading(false)
+      setPremiumRecommendationLoading(false);
     });
   } else {
     console.error('Geolocation is not supported by this browser.');
-    setPremiumRecommendationLoading(false)
+    setPremiumRecommendationLoading(false);
   }
 };
 
@@ -131,10 +140,10 @@ export default function Dashboard() {
   const { isLoaded, user } = useUser();
   const [foodList, setFoodList] = useState([]);
 
-  const [premiumRecommendation, setPremiumRecommendation] = useState([]);
-  const [premiumRecommendationLoading, setPremiumRecommendationLoading] = useState();
+  const [premiumRecommendation, setPremiumRecommendation] = useState(null);
+  const [premiumRecommendationLoading, setPremiumRecommendationLoading] = useState(false);
 
-  const [foodLoading, isFoodLoading] = useState();
+  const [foodLoading, isFoodLoading] = useState(false);
   
   const [liked, setLiked] = useState([]);
 
@@ -144,7 +153,7 @@ export default function Dashboard() {
       fetchRecommendations(user, setFoodList, isFoodLoading);
       sendRecommendationRequest(user, setPremiumRecommendation, setPremiumRecommendationLoading);
     }
-  }, [isLoaded, user, setFoodList, setPremiumRecommendation, setPremiumRecommendationLoading]);
+  }, [isLoaded, user]);
 
   // Extract IDs and call the new endpoint when loading is done
   React.useEffect(() => {
@@ -170,7 +179,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      {foodLoading && premiumRecommendationLoading? (
+      {foodLoading && premiumRecommendationLoading ? (
           <div className="flex items-center justify-center min-h-screen">
             <div className="w-1/2 text-center">
               <div className="scroll-m-20 pb-5 text-3xl font-semibold tracking-tight first:mt-0 p-4">
@@ -182,7 +191,7 @@ export default function Dashboard() {
       ) : (
         <div className="min-h-screen">
           <div className="scroll-m-15 pb-2 text-4xl font-semibold tracking-tight first:mt-0 mb-10">Your Recommendations</div>
-          {premiumRecommendation.length > 0 && (
+          {premiumRecommendation && (
             <div className="relative mb-4 w-2/3 mx-auto flex-1">
               {/* Badge positioned absolutely */}
               <Badge 
@@ -200,7 +209,7 @@ export default function Dashboard() {
                 <div className="p-4 flex flex-col justify-between w-2/3">
                   <CardHeader>
                     <div className="flex">
-                      <CardTitle style={{ marginRight: '10px' }}>{premiumRecommendation[0].name}</CardTitle>
+                      <CardTitle style={{ marginRight: '10px' }}>{premiumRecommendation.name}</CardTitle>
                       <Dialog>
                         <DialogTrigger><Maximize2 /></DialogTrigger>
                         <DialogContent className="flex flex-row">
@@ -209,28 +218,28 @@ export default function Dashboard() {
                         </div>
                           <div className="flex flex-col p-4 w-2/3">
                             <DialogHeader>
-                              <DialogTitle>{premiumRecommendation[0].name}</DialogTitle>
+                              <DialogTitle>{premiumRecommendation.name}</DialogTitle>
                               <DialogDescription>
-                                {premiumRecommendation[0].cuisine}
+                                {premiumRecommendation.cuisine}
                                 <Badge className="bg-gray-300 ml-2">
-                                  {premiumRecommendation[0].calories} cal
+                                  {premiumRecommendation.calories} cal
                                 </Badge>
                               </DialogDescription>
                             </DialogHeader>
                             <div className="mt-4">
-                              <p className="text-lg font-bold">{premiumRecommendation[0].price}</p>
+                              <p className="text-lg font-bold">{premiumRecommendation.price}</p>
                               <hr className="my-2 border-gray-300" />
-                              <p>{premiumRecommendation[0].restaurantName}</p>
-                              <p>{premiumRecommendation[0].address}</p>
+                              <p>{premiumRecommendation.restaurantName}</p>
+                              <p>{premiumRecommendation.address}</p>
                               <p>
                                 Website:
                                 <a 
-                                  href= {premiumRecommendation[0].website} 
+                                  href={premiumRecommendation.website} 
                                   target="_blank" 
                                   rel="noopener noreferrer" 
                                   className="text-blue-500 hover:text-blue-700 underline"
                                 >
-                                   {premiumRecommendation[0].website}
+                                   {premiumRecommendation.website}
                                 </a>
                               </p>
                             </div>
@@ -238,14 +247,14 @@ export default function Dashboard() {
                         </DialogContent>
                       </Dialog>
                     </div>
-                    <CardDescription>{premiumRecommendation[0].cuisine}</CardDescription>
+                    <CardDescription>{premiumRecommendation.cuisine}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <p>description</p>
                   </CardContent>
                   <hr className="my-2 border-gray-300" />
                   <CardFooter>
-                    {premiumRecommendation[0].dietLabels.map((tag) => (
+                    {premiumRecommendation.dietLabels.map((tag) => (
                       <Badge key={tag} style={{ marginRight: '10px' }} variant="outline">{tag}</Badge>
                     ))}
                   </CardFooter>
@@ -302,7 +311,7 @@ export default function Dashboard() {
             </ScrollArea>
           </div>
         </div>
-      )};
+      )}
     </div>
   );
 }
