@@ -3,7 +3,7 @@ import { MongoClient } from 'mongodb';
 
 async function fetchRecentItems(db, collectionName, limit) {
     const collection = db.collection(collectionName);
-    return collection.find({}, { projection: { content_embedding: 1 } })  
+    return collection.find({}, { projection: { content_embedding: 1 } })
                     .sort({ timestamp: -1 })
                     .limit(limit)
                     .toArray();
@@ -38,7 +38,7 @@ async function generateQueryVector(likedItems, dislikedItems) {
         const dislikedInvertedVector = invertVector(dislikedMeanVector);
         queryVector = queryVector.map((value, index) => value + dislikedInvertedVector[index]);
     }
-    console.log("queryVector:", queryVector)
+    console.log("queryVector:", queryVector);
     return queryVector;
 }
 
@@ -58,33 +58,32 @@ function removeDuplicates(results) {
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const clerkId = req.query.clerkID;
+        const clerkId = req.query.clerkId;
         const uri = process.env.MONGO_URI;
         const client = new MongoClient(uri);
-  
-      try {
-        await client.connect();
-        const db = client.db(clerkId);
-            const solucioFoodDb = client.db('solucio-food');
+
+        try {
             await client.connect();
-            const embeddingsCollection = solucioFoodDb.collection('solucio-food-embeddings');
-        
-            const indexInformation = await embeddingsCollection.indexInformation();
-            console.log("Index Information:", indexInformation);
-        
+            const db = client.db(clerkId);
+            const solucioFoodDb = client.db('solucio-food');
+
             const likedItems = await fetchRecentItems(db, 'liked', 30);
-            console.log(likedItems)
+            console.log(likedItems);
+            const thumbsUpItems = await fetchRecentItems(db, 'thumbs_up', 30);
+            console.log(thumbsUpItems);
             const swipeRightItems = await fetchRecentItems(db, 'swipe_right', 30);
-            console.log(swipeRightItems)
+            console.log(swipeRightItems);
 
             const swipeLeftItems = await fetchRecentItems(db, 'swipe_left', 30);
-            console.log(swipeLeftItems)
+            console.log(swipeLeftItems);
+            const thumbsDownItems = await fetchRecentItems(db, 'thumbs_down', 30);
+            console.log(thumbsDownItems);
 
-            const positiveItems = [...likedItems, ...swipeRightItems];
-            const negativeItems = swipeLeftItems;
+            const positiveItems = [...likedItems, ...swipeRightItems, ...thumbsUpItems];
+            const negativeItems = [...swipeLeftItems, ...thumbsDownItems];
 
             const queryVector = await generateQueryVector(positiveItems, negativeItems);
-            
+
             const results = await solucioFoodDb.collection('solucio-food-embeddings').aggregate([
                 {
                     "$vectorSearch": {
