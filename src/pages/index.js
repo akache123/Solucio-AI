@@ -1,23 +1,35 @@
 import Link from "next/link"
+
+import {
+  SignInButton,
+  SignOutButton,
+  SignedIn,
+  SignedOut,
+  useUser,
+} from "@clerk/nextjs";
+import { Button } from "../components/ui/button";
+
 export default function LandingPage() {
+  const { isLoaded, isSignedIn, user } = useUser();
+
   return (
     <div>
-        <header className="header">
-            <div className="header-left">Solucio AI</div>
-            <div className="header-right">
-                <button>Log In</button>
-            </div>
-        </header>
         <main className="main">
             <div className="text-container">
                 <h1>Get recommendations for food</h1>
                 <p>Tired? Hungry? Find the dinner you want... <em>instantly.</em></p>
                 <div className="buttons">
-        <Link href="/dashboard">
-          <div className="inline-block px-6 py-3 bg-blue-500 text-white font-semibold text-lg rounded-lg shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out">
-            Get Started
-          </div>
-        </Link>
+        {isSignedIn ? (
+          <Link href="/dashboard">
+            <div className="inline-block px-6 py-3 bg-blue-500 text-white font-semibold text-lg rounded-lg shadow-lg hover:bg-blue-600 transition duration-300 ease-in-out">
+              Go to Dashboard
+            </div>
+          </Link>
+        ) : (
+          <Button variant={"secondary"}>
+            <SignInButton />
+          </Button>
+        )}
       </div>
             </div>
             <div className="flex justify-end">
