@@ -310,11 +310,11 @@ export default function Dashboard() {
                     <p>description</p>
                   </CardContent>
                   <hr className="my-2 border-gray-300" />
-                  <CardFooter>
+                  {/* <CardFooter>
                     {premiumRecommendation.dietLabels.map((tag) => (
                       <Badge key={tag} style={{ marginRight: '10px' }} variant="outline">{tag}</Badge>
                     ))}
-                  </CardFooter>
+                  </CardFooter> */}
                 </div>
               </div>
             </div>
