@@ -4,11 +4,11 @@
 
 ### 1. `/api/swipe_right`
 
-- **Purpose:** Initiates a swipe right action.
+- **Purpose:** Initiates a swipe right action, typically used to indicate a positive interest in an item.
 - **Method:** POST
 - **Parameters:**
-  - `clerkId`: ID of the Clerk user performing the action.
-  - `objectId`: ID of the object being swiped.
+  - `clerkId`: The unique identifier of the Clerk user performing the action.
+  - `objectId`: The unique identifier of the object being swiped right.
 - **Usage Example:**
   ```javascript
   const handleSwipeRight = async () => {
@@ -27,11 +27,11 @@
 
   ### 1b. `/api/swipe_left`
 
-- **Purpose:** Initiates a swipe left action.
+- **Purpose:** Initiates a swipe left action, typically used to indicate a lack of interest in an item.
 - **Method:** POST
 - **Parameters:**
-  - \`clerkId\`: ID of the Clerk user performing the action.
-  - \`objectId\`: ID of the object being swiped.
+  - `clerkId`: The unique identifier of the Clerk user performing the action.
+  - `objectId`: The unique identifier of the object being swiped left.
 - **Usage Example:**
   ```javascript
   const handleSwipeLeft = async () => {
@@ -50,11 +50,11 @@
 
 ### 1c. `/api/liked`
 
-- **Purpose:** Handles liked objects action.
+- **Purpose:** Handles the action of liking an object, marking it as a preferred item.
 - **Method:** POST
 - **Parameters:**
-  - \`clerkId\`: ID of the Clerk user performing the action.
-  - \`objectId\`: ID of the object being liked.
+  - `clerkId`: The unique identifier of the Clerk user performing the action.
+  - `objectId`: The unique identifier of the object being liked.
 - **Usage Example:**
 ```javascript
   const handleLiked = async () => {
@@ -73,11 +73,11 @@
 
 ### 1d. `/api/delete_liked`
 
-- **Purpose:** Handles unliking objects action.
+- **Purpose:** Handles the action of unliking an object, removing it from the list of preferred items.
 - **Method:** DELETE
 - **Parameters:**
-  - \`clerkId\`: ID of the Clerk user performing the action.
-  - \`objectId\`: ID of the object being liked.
+  - `clerkId`: The unique identifier of the Clerk user performing the action.
+  - `objectId`: The unique identifier of the object being unliked.
 - **Usage Example:**
 ```javascript
   const handleDeleteLiked = async () => {
@@ -96,11 +96,11 @@
 
 ### 1c. `/api/check-liked`
 
-- **Purpose:** Checks which recommendations were liked previously
+- **Purpose:** Checks which recommendations were liked previously by the Clerk user.
 - **Method:** POST
 - **Parameters:**
-  - \`clerkId\`: ID of the Clerk user performing the action.
-  - \`objects\`: List of objects
+  - \`clerkId\`: The unique identifier of the Clerk user performing the action.
+  - \`objects\`: A list of objects to check.
 - **Usage Example:**
 ```javascript
   const extractAndCheckRecommendations = async () => {
@@ -119,7 +119,7 @@
 
 ### 2. `/api/load_data` DO NOT USE - IGNORE
 
-- **Purpose:** Loads data based on latitude and longitude.
+- **Purpose:**  Loads data based on latitude and longitude, typically for location-based services.
 - **Method:** GET
 - **Parameters:**
   - \`latitude\`: Latitude of the location.
@@ -139,7 +139,7 @@
   ```
 ### 3. `/api/generate-first-swipes`
 
-- **Purpose:** Fetches random objects for display.
+- **Purpose:** Fetches random objects for initial display, used to provide the user with initial options.
 - **Method:** GET
 - **Usage Example:**
  ```javascript
@@ -156,10 +156,10 @@
 
   ### 4. `/api/generate-recommendations/:clerkId`
 
-- **Purpose:** Fetches 15 recommendations for a specific user when they are on dashboard.
+- **Purpose:** Fetches 15 recommendations for a specific user when they are on the dashboard.
 - **Method:** POST
 - **Parameters:**
-  - \`clerkId\`: ID of the Clerk user.
+  - \`clerkId\`: The unique identifier of the Clerk user.
 - **Usage Example:**
   ```javascript
   const fetchRecommendations = async () => {
@@ -181,7 +181,7 @@
 
 ### 5. `/api/change-to-embed` DO NOT USE - IGNORE
 
-- **Purpose:** Updates embeddings.
+- **Purpose:** Updates embeddings, used internally for machine learning models.
 - **Method:** POST
 - **Usage Example:**
 ```javascript
@@ -197,10 +197,10 @@
 
 ### 6. `/api/generate-single-recommendation/:clerkId`
 
-- **Purpose:** Fetches 1 recommendation of an item from diff places for a specific user when they expand a card.
+- **Purpose:** Fetches a single recommendation of an item from different places for a specific user when they expand a card.
 - **Method:** POST
 - **Parameters:**
-  - \`clerkId\`: ID of the Clerk user.
+  - \`clerkId\`: The unique identifier of the Clerk user.
 
 - **Request Body:**
   - \`latitude:\` Latitude of the user's current location.
@@ -244,11 +244,11 @@
 
   ### `/api/thumbs_up`
 
-- **Purpose:** Handles thumbs up action.
+- **Purpose:** Handles thumbs up action, indicating positive feedback for an item.
 - **Method:** POST
 - **Parameters:**
-  - `clerkId`: ID of the Clerk user performing the action.
-  - `objectId`: ID of the object being given a thumbs up.
+  - `clerkId`: The unique identifier of the Clerk user performing the action.
+  - `objectId`: The unique identifier of the object being given a thumbs up.
 - **Usage Example:**
   ```javascript
   const handleThumbsUp = async () => {
@@ -267,11 +267,11 @@
 
 ### `/api/thumbs_down`
 
-- **Purpose:** Handles thumbs down action.
+- **Purpose:** Handles thumbs down action, indicating negative feedback for an item.
 - **Method:** POST
 - **Parameters:**
-  - `clerkId`: ID of the Clerk user performing the action.
-  - `objectId`: ID of the object being given a thumbs down.
+  - `clerkId`: The unique identifier of the Clerk user performing the action.
+  - `objectId`: The unique identifier of the object being given a thumbs down.
 - **Usage Example:**
   ```javascript
   const handleThumbsDown = async () => {
